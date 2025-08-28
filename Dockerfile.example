@@ -1,0 +1,24 @@
+# Lightweight Dockerfile for example services
+FROM node:16-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm ci --only=production
+
+# Copy example services
+COPY examples/ ./examples/
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
+RUN chown -R nodejs:nodejs /app
+USER nodejs
+
+# Expose port (will be overridden by specific service)
+EXPOSE 3000
+
+# Default command (will be overridden by docker-compose)
+CMD ["node", "examples/user-service.js"]

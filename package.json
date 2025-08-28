@@ -1,0 +1,88 @@
+{
+  "name": "simple-dashboard-for-microservices",
+  "version": "1.0.0",
+  "description": "A modern, real-time web dashboard for monitoring and managing REST microservices",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:unit": "jest --testPathPattern=tests --testPathIgnorePatterns=tests/e2e.test.js,tests/.*-service.test.js",
+    "test:integration": "jest --testPathPattern=tests/.*-service.test.js,tests/api.integration.test.js",
+    "test:e2e": "jest --testPathPattern=tests/e2e.test.js",
+    "test:security": "jest --testPathPattern=tests/security.test.js",
+    "test:all": "npm run test:unit && npm run test:integration && npm run test:security",
+    "docker:build": "docker build -t simple-dashboard-for-microservices .",
+    "docker:run": "docker run -p 3000:3000 simple-dashboard-for-microservices",
+    "docker:compose": "docker-compose up -d",
+    "examples": "./start-services.sh"
+  },
+  "keywords": [
+    "microservices",
+    "rest-api",
+    "web-interface",
+    "dashboard",
+    "monitoring",
+    "health-check",
+    "api-testing",
+    "real-time",
+    "websocket",
+    "nodejs",
+    "express"
+  ],
+  "author": {
+    "name": "Sergey",
+    "email": "your-email@example.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/microservices-web-interface.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/microservices-web-interface/issues"
+  },
+  "homepage": "https://github.com/your-username/microservices-web-interface#readme",
+  "engines": {
+    "node": ">=10.0.0",
+    "npm": ">=6.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "axios": "^0.21.4",
+    "socket.io": "^2.4.1",
+    "express-rate-limit": "^5.5.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "jest": "^26.6.3",
+    "supertest": "^6.1.6"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"],
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "examples/**/*.js",
+      "!src/index.js",
+      "!**/node_modules/**"
+    ],
+    "coverageReporters": ["text", "lcov", "html"],
+    "coverageDirectory": "coverage",
+    "testTimeout": 15000,
+    "coverageThreshold": {
+      "global": {
+        "branches": 50,
+        "functions": 50,
+        "lines": 50,
+        "statements": 50
+      }
+    },
+    "testPathIgnorePatterns": [
+      "/node_modules/"
+    ]
+  }
+}
