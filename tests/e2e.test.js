@@ -329,7 +329,13 @@ describe('End-to-End Integration Tests', () => {
                     .send({ total: 'invalid' }) // Invalid total type
             ];
 
-            const results = await Promise.allSettled(invalidRequests);
+            // Use Promise.all with catch for Node.js v10 compatibility
+            const results = await Promise.all(
+                invalidRequests.map(promise => 
+                    promise.catch(error => ({ status: 'rejected', reason: error }))
+                        .then(value => ({ status: 'fulfilled', value }))
+                )
+            );
             
             results.forEach(result => {
                 if (result.status === 'fulfilled') {

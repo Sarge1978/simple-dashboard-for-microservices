@@ -15,8 +15,6 @@ global.WebSocket = jest.fn(() => ({
 global.fetch = jest.fn();
 
 describe('Frontend Dashboard Tests', () => {
-    let document, window;
-
     beforeEach(() => {
         // Reset DOM
         document.body.innerHTML = `
@@ -36,15 +34,17 @@ describe('Frontend Dashboard Tests', () => {
             </form>
         `;
 
+        // Initialize global variables that would normally be in script.js
+        global.services = [];
+        global.activityLog = [];
+        global.ws = null;
+
         // Reset fetch mock
         fetch.mockClear();
     });
 
     describe('Service Management', () => {
         it('should add service to the list', () => {
-            // Mock the services array
-            window.services = [];
-            
             const mockService = {
                 id: 1,
                 name: 'Test Service',
@@ -54,23 +54,23 @@ describe('Frontend Dashboard Tests', () => {
             };
 
             // Simulate adding service
-            window.services.push(mockService);
+            global.services.push(mockService);
             
-            expect(window.services).toHaveLength(1);
-            expect(window.services[0]).toEqual(mockService);
+            expect(global.services).toHaveLength(1);
+            expect(global.services[0]).toEqual(mockService);
         });
 
         it('should remove service from the list', () => {
-            window.services = [
+            global.services = [
                 { id: 1, name: 'Service 1', url: 'http://localhost:3001' },
                 { id: 2, name: 'Service 2', url: 'http://localhost:3002' }
             ];
 
             // Simulate removing service
-            window.services = window.services.filter(s => s.id !== 1);
+            global.services = global.services.filter(s => s.id !== 1);
             
-            expect(window.services).toHaveLength(1);
-            expect(window.services[0].id).toBe(2);
+            expect(global.services).toHaveLength(1);
+            expect(global.services[0].id).toBe(2);
         });
     });
 
@@ -145,30 +145,30 @@ describe('Frontend Dashboard Tests', () => {
 
     describe('Service Health Monitoring', () => {
         it('should update service status', () => {
-            window.services = [
+            global.services = [
                 { id: 1, name: 'Test Service', status: 'unknown' }
             ];
 
             // Simulate status update
             const serviceId = 1;
             const newStatus = 'online';
-            const service = window.services.find(s => s.id === serviceId);
+            const service = global.services.find(s => s.id === serviceId);
             if (service) {
                 service.status = newStatus;
                 service.lastCheck = new Date().toISOString();
             }
 
-            expect(window.services[0].status).toBe('online');
-            expect(window.services[0].lastCheck).toBeDefined();
+            expect(global.services[0].status).toBe('online');
+            expect(global.services[0].lastCheck).toBeDefined();
         });
 
         it('should handle offline status', () => {
-            window.services = [
+            global.services = [
                 { id: 1, name: 'Test Service', status: 'online' }
             ];
 
             // Simulate offline status
-            const service = window.services[0];
+            const service = global.services[0];
             service.status = 'offline';
             service.lastCheck = new Date().toISOString();
 
@@ -178,7 +178,7 @@ describe('Frontend Dashboard Tests', () => {
 
     describe('Activity Logging', () => {
         it('should add log entry', () => {
-            window.activityLog = [];
+            global.activityLog = [];
 
             const logEntry = {
                 timestamp: new Date().toISOString(),
@@ -186,19 +186,19 @@ describe('Frontend Dashboard Tests', () => {
                 message: 'Test log message'
             };
 
-            window.activityLog.push(logEntry);
+            global.activityLog.push(logEntry);
 
-            expect(window.activityLog).toHaveLength(1);
-            expect(window.activityLog[0]).toEqual(logEntry);
+            expect(global.activityLog).toHaveLength(1);
+            expect(global.activityLog[0]).toEqual(logEntry);
         });
 
         it('should limit log entries', () => {
-            window.activityLog = [];
+            global.activityLog = [];
             const maxEntries = 100;
 
             // Add more entries than the limit
             for (let i = 0; i < 150; i++) {
-                window.activityLog.push({
+                global.activityLog.push({
                     timestamp: new Date().toISOString(),
                     level: 'info',
                     message: `Log entry ${i}`
@@ -206,11 +206,11 @@ describe('Frontend Dashboard Tests', () => {
             }
 
             // Simulate trimming
-            if (window.activityLog.length > maxEntries) {
-                window.activityLog = window.activityLog.slice(-maxEntries);
+            if (global.activityLog.length > maxEntries) {
+                global.activityLog = global.activityLog.slice(-maxEntries);
             }
 
-            expect(window.activityLog).toHaveLength(maxEntries);
+            expect(global.activityLog).toHaveLength(maxEntries);
         });
     });
 

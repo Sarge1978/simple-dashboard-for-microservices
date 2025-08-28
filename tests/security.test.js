@@ -7,7 +7,7 @@ describe('Security and Performance Tests', () => {
 
     beforeEach(() => {
         app = express();
-        app.use(express.json());
+        // Don't set up express.json() here - let individual tests configure it
     });
 
     describe('Rate Limiting', () => {
@@ -34,6 +34,7 @@ describe('Security and Performance Tests', () => {
 
     describe('Input Validation', () => {
         beforeEach(() => {
+            app.use(express.json());
             app.post('/api/service', (req, res) => {
                 const { name, url, description } = req.body;
 
@@ -103,6 +104,7 @@ describe('Security and Performance Tests', () => {
 
     describe('XSS Protection', () => {
         beforeEach(() => {
+            app.use(express.json());
             app.post('/api/log', (req, res) => {
                 const { message } = req.body;
 
@@ -131,6 +133,7 @@ describe('Security and Performance Tests', () => {
 
     describe('JSON Parsing Security', () => {
         it('should handle malformed JSON gracefully', async () => {
+            app.use(express.json());
             app.use((error, req, res, next) => {
                 if (error instanceof SyntaxError && error.status === 400) {
                     return res.status(400).json({ error: 'Invalid JSON' });
