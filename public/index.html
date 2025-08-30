@@ -8,13 +8,50 @@
     <link href="styles.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal" style="display: block;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-lock"></i> Login Required</h2>
+            </div>
+            <div class="modal-body">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                    </div>
+                </form>
+                <div class="login-help">
+                    <p><strong>Demo Credentials:</strong></p>
+                    <p>Admin: admin / admin123</p>
+                    <p>User: user / user123</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="mainApp" style="display: none;">
         <!-- Header -->
         <header class="header">
             <div class="header-content">
                 <h1><i class="fas fa-network-wired"></i> Simple Dashboard for Microservices</h1>
                 <div class="header-actions">
-                    <button class="btn btn-primary" onclick="showAddServiceModal()">
+                    <div class="user-info">
+                        <span id="userWelcome"></span>
+                        <button class="btn btn-secondary" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                    <button class="btn btn-primary" onclick="showAddServiceModal()" id="addServiceBtn">
                         <i class="fas fa-plus"></i> Add Service
                     </button>
                     <button class="btn btn-secondary" onclick="checkAllServices()">
@@ -26,75 +63,184 @@
 
         <!-- Main Content -->
         <main class="main-content">
+            <!-- Analytics Dashboard -->
+            <section class="analytics-section collapsible-section">
+                <div class="section-header" onclick="toggleSection('analytics')">
+                    <h2><i class="fas fa-chart-line"></i> Performance Analytics</h2>
+                    <button class="collapse-btn">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="section-content" id="analytics-content">
+                    <div class="analytics-controls">
+                        <select id="timeRangeSelect" onchange="updateAnalytics()">
+                            <option value="5m">Last 5 minutes</option>
+                            <option value="15m">Last 15 minutes</option>
+                            <option value="1h" selected>Last hour</option>
+                            <option value="6h">Last 6 hours</option>
+                            <option value="24h">Last 24 hours</option>
+                        </select>
+                        <button class="btn btn-outline" onclick="updateAnalytics()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                    
+                    <div class="analytics-grid">
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <h3>Overview</h3>
+                                <i class="fas fa-tachometer-alt"></i>
+                            </div>
+                            <div class="metric-content" id="overviewMetrics">
+                                <div class="metric-item">
+                                    <span class="metric-label">Total Requests</span>
+                                    <span class="metric-value" id="totalRequests">-</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Error Rate</span>
+                                    <span class="metric-value" id="errorRate">-</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Avg Response Time</span>
+                                    <span class="metric-value" id="avgResponseTime">-</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Uptime</span>
+                                    <span class="metric-value" id="uptime">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <h3>System Metrics</h3>
+                                <i class="fas fa-server"></i>
+                            </div>
+                            <div class="metric-content" id="systemMetrics">
+                                <div class="metric-item">
+                                    <span class="metric-label">Memory Usage</span>
+                                    <span class="metric-value" id="memoryUsage">-</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Heap Used</span>
+                                    <span class="metric-value" id="heapUsed">-</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Process ID</span>
+                                    <span class="metric-value" id="processId">-</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Node Version</span>
+                                    <span class="metric-value" id="nodeVersion">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card full-width">
+                            <div class="metric-header">
+                                <h3>Top API Endpoints</h3>
+                                <i class="fas fa-list"></i>
+                            </div>
+                            <div class="metric-content">
+                                <div class="endpoint-list" id="topEndpoints">
+                                    <!-- Endpoints will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Services Grid -->
-            <section class="services-section">
-                <h2>Microservices</h2>
-                <div class="services-grid" id="servicesGrid">
-                    <!-- Services will be loaded here -->
+            <section class="services-section collapsible-section">
+                <div class="section-header" onclick="toggleSection('services')">
+                    <h2><i class="fas fa-cubes"></i> Microservices</h2>
+                    <button class="collapse-btn">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="section-content" id="services-content">
+                    <div class="services-grid" id="servicesGrid">
+                        <!-- Services will be loaded here -->
+                    </div>
                 </div>
             </section>
 
             <!-- API Tester -->
-            <section class="api-tester-section">
-                <div class="section-header">
-                    <h2>API Tester</h2>
-                    <button class="btn btn-outline" onclick="clearApiResults()">
-                        <i class="fas fa-trash"></i> Clear
+            <section class="api-tester-section collapsible-section">
+                <div class="section-header" onclick="toggleSection('api-tester')">
+                    <h2><i class="fas fa-flask"></i> API Tester</h2>
+                    <button class="collapse-btn">
+                        <i class="fas fa-chevron-down"></i>
                     </button>
                 </div>
-                
-                <div class="api-tester">
-                    <div class="request-panel">
-                        <div class="request-form">
-                            <div class="form-row">
-                                <select id="serviceSelect" onchange="updateEndpoints()">
-                                    <option value="">Select Service</option>
-                                </select>
-                                <select id="methodSelect">
-                                    <option value="GET">GET</option>
-                                    <option value="POST">POST</option>
-                                    <option value="PUT">PUT</option>
-                                    <option value="DELETE">DELETE</option>
-                                    <option value="PATCH">PATCH</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-row">
-                                <input type="text" id="pathInput" placeholder="API Path (e.g.: /users)" />
-                                <button class="btn btn-primary" onclick="executeRequest()">
-                                    <i class="fas fa-play"></i> Execute
-                                </button>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Headers (JSON):</label>
-                                <textarea id="headersInput" placeholder='{"Content-Type": "application/json"}'></textarea>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Request Body (JSON):</label>
-                                <textarea id="bodyInput" placeholder='{"key": "value"}'></textarea>
-                            </div>
-                        </div>
+                <div class="section-content" id="api-tester-content">
+                    <div class="section-actions">
+                        <button class="btn btn-outline" onclick="clearApiResults()">
+                            <i class="fas fa-trash"></i> Clear
+                        </button>
                     </div>
+                    
+                    <div class="api-tester">
+                        <div class="request-panel">
+                            <div class="request-form">
+                                <div class="form-row">
+                                    <select id="serviceSelect" onchange="updateEndpoints()">
+                                        <option value="">Select Service</option>
+                                    </select>
+                                    <select id="methodSelect">
+                                        <option value="GET">GET</option>
+                                        <option value="POST">POST</option>
+                                        <option value="PUT">PUT</option>
+                                        <option value="DELETE">DELETE</option>
+                                        <option value="PATCH">PATCH</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <input type="text" id="pathInput" placeholder="API Path (e.g.: /users)" />
+                                    <button class="btn btn-primary" onclick="executeRequest()">
+                                        <i class="fas fa-play"></i> Execute
+                                    </button>
+                                </div>
 
-                    <div class="response-panel">
-                        <div class="response-header">
-                            <h3>Response</h3>
-                            <div class="response-status" id="responseStatus"></div>
+                                <div class="form-group">
+                                    <label>Headers (JSON):</label>
+                                    <textarea id="headersInput" placeholder='{"Content-Type": "application/json"}'></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Request Body (JSON):</label>
+                                    <textarea id="bodyInput" placeholder='{"key": "value"}'></textarea>
+                                </div>
+                            </div>
                         </div>
-                        <div class="response-content">
-                            <pre id="responseBody">Select service and execute request</pre>
+
+                        <div class="response-panel">
+                            <div class="response-header">
+                                <h3>Response</h3>
+                                <div class="response-status" id="responseStatus"></div>
+                            </div>
+                            <div class="response-content">
+                                <pre id="responseBody">Select service and execute request</pre>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
             <!-- Logs Section -->
-            <section class="logs-section">
-                <h2>Activity Logs</h2>
-                <div class="logs-container" id="logsContainer">
-                    <!-- Logs will be added here -->
+            <section class="logs-section collapsible-section">
+                <div class="section-header" onclick="toggleSection('logs')">
+                    <h2><i class="fas fa-file-alt"></i> Activity Logs</h2>
+                    <button class="collapse-btn">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="section-content" id="logs-content">
+                    <div class="logs-container" id="logsContainer">
+                        <!-- Logs will be added here -->
+                    </div>
                 </div>
             </section>
         </main>

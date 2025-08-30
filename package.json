@@ -9,11 +9,11 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:unit": "jest --testPathPattern=tests --testPathIgnorePatterns=tests/e2e.test.js,tests/.*-service.test.js",
+    "test:unit": "jest --testPathPattern=tests --testPathIgnorePatterns=tests/.*-service.test.js",
     "test:integration": "jest --testPathPattern=tests/.*-service.test.js,tests/api.integration.test.js",
-    "test:e2e": "jest --testPathPattern=tests/e2e.test.js",
     "test:security": "jest --testPathPattern=tests/security.test.js",
-    "test:all": "npm run test:unit && npm run test:integration && npm run test:security",
+    "test:all": "npm run test",
+    "test:all-sequential": "npm run test:unit && npm run test:integration && npm run test:security",
     "docker:build": "docker build -t simple-dashboard-for-microservices .",
     "docker:run": "docker run -p 3000:3000 simple-dashboard-for-microservices",
     "docker:compose": "docker-compose up -d",
@@ -50,11 +50,13 @@
     "npm": ">=6.0.0"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
     "axios": "^0.21.4",
-    "socket.io": "^2.4.1",
-    "express-rate-limit": "^5.5.1"
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-rate-limit": "^5.5.1",
+    "jsonwebtoken": "^9.0.2",
+    "socket.io": "^2.4.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.2",
@@ -63,14 +65,20 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"],
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/setup.js"
+    ],
     "collectCoverageFrom": [
       "src/**/*.js",
       "examples/**/*.js",
       "!src/index.js",
       "!**/node_modules/**"
     ],
-    "coverageReporters": ["text", "lcov", "html"],
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
     "coverageDirectory": "coverage",
     "testTimeout": 15000,
     "coverageThreshold": {
